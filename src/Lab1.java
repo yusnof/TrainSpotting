@@ -4,10 +4,11 @@ import java.awt.Point;
 import TSim.*;
 
 public class Lab1 {
+  TSimInterface tsi; 
   
   
   //final Thread train1; 
-  final TSimInterface tsi; 
+  
   Semaphore blue, red, green, pink, grey; 
   SensorEvent sensorEvent; 
   // will calculating from top top down ToDo::declaring the hardcoded part of the Point. 
@@ -17,21 +18,15 @@ public class Lab1 {
   final Point switch4 = new Point(0, 0);  
   Point sensorPoint;   
   
-
-    // constructor for the lab1 where we will be .. 
-    public void Lab1(int speed1, int speed2) throws InterruptedException {
-      tsi = TSimInterface.getInstance();
-      blue = new Semaphore(1); 
-    
-      
-      //train1 = new Thread(() -> runTrain(1,speed1)); 
-      //train2 = new Thread(() -> runTrain(2,speed2)); 
-
-      
+  private class ThreadTrain implements Runnable{
+    int trainId; 
+    int speed; 
+    public ThreadTrain(int trainId, int speed){
+      this.trainId = trainId; 
+      this.speed = speed;
     }
-
-    // method that will be handling running of the train. 
-    private void runTrain(int trainId, int speed){
+    @Override
+    public void run() {
       try {
         tsi.setSpeed(trainId,speed);
         while (true) {
@@ -50,6 +45,21 @@ public class Lab1 {
         System.exit(1); 
       }
     }
+    }
+
+  
+
+    // constructor for the lab1 where we will be .. 
+    public void Lab1(int speed1, int speed2) throws InterruptedException {
+      TSimInterface tsi = TSimInterface.getInstance();
+      blue = new Semaphore(1); 
+
+      ThreadTrain train1 = new ThreadTrain(1, 10); 
+      ThreadTrain train2 = new ThreadTrain(2, 10); 
+    }
+
+    // method that will be handling running of the train. 
+    
     private void handleSensorEvent(SensorEvent sensor, int trainId, int speed) throws CommandException, InterruptedException{
       sensorPoint = new Point(sensor.getXpos(), sensor.getYpos()); 
       int x = sensor.getXpos(); 
